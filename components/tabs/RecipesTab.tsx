@@ -118,7 +118,7 @@ function RecipeCard({ recipe, onClick }: { recipe: Recipe; onClick: () => void }
         {recipe.photo ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
-            src={`data:image/jpeg;base64,${recipe.photo}`}
+            src={recipe.photo}
             alt={recipe.name}
             style={{
               position: 'absolute',

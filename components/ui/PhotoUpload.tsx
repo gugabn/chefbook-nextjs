@@ -4,7 +4,7 @@ import { useRef } from 'react'
 
 interface PhotoUploadProps {
   value: string
-  onChange: (base64: string, mediaType: string) => void
+  onChange: (dataUrl: string) => void
   ratio?: '16/9' | '3/4'
 }
 
@@ -16,11 +16,8 @@ export default function PhotoUpload({ value, onChange, ratio = '16/9' }: PhotoUp
   const handleFile = (file: File) => {
     const reader = new FileReader()
     reader.onload = (e) => {
-      const result = e.target?.result as string
-      // result = "data:image/jpeg;base64,..."
-      const [header, base64] = result.split(',')
-      const mediaType = header.replace('data:', '').replace(';base64', '')
-      onChange(base64, mediaType)
+      // result is a complete data URL: "data:image/png;base64,..."
+      onChange(e.target?.result as string)
     }
     reader.readAsDataURL(file)
   }
@@ -67,7 +64,7 @@ export default function PhotoUpload({ value, onChange, ratio = '16/9' }: PhotoUp
         {value ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
-            src={`data:image/jpeg;base64,${value}`}
+            src={value}
             alt="Foto"
             style={{ width: '100%', height: '100%', objectFit: 'cover', position: 'absolute', inset: 0 }}
           />

@@ -34,7 +34,6 @@ export default function AddRecipeModal({
   showToast,
 }: AddRecipeModalProps) {
   const [photo, setPhoto] = useState('')
-  const [photoType, setPhotoType] = useState('image/jpeg')
   const [name, setName] = useState('')
   const [category, setCategory] = useState(CATEGORIES[0])
   const [time, setTime] = useState('')
@@ -55,7 +54,6 @@ export default function AddRecipeModal({
       setSteps(initialData.steps.length ? initialData.steps : [''])
     } else if (isOpen && !initialData) {
       setPhoto('')
-      setPhotoType('image/jpeg')
       setName('')
       setCategory(CATEGORIES[0])
       setTime('')
@@ -65,27 +63,32 @@ export default function AddRecipeModal({
     }
   }, [isOpen, initialData])
 
-  const handlePhoto = async (base64: string, mediaType: string) => {
-    setPhoto(base64)
-    setPhotoType(mediaType)
+  const handlePhoto = async (dataUrl: string) => {
+    setPhoto(dataUrl)
 
-    if (apiKey) {
-      setAnalyzing(true)
-      showToast('Analisando imagem com IA...')
-      try {
-        const data = await analyzeRecipeImage(base64, mediaType, apiKey)
-        if (data.name) setName(data.name)
-        if (data.category && CATEGORIES.includes(data.category)) setCategory(data.category)
-        if (data.time) setTime(data.time)
-        if (data.servings) setServings(data.servings)
-        if (data.ingredients?.length) setIngredients(data.ingredients)
-        if (data.steps?.length) setSteps(data.steps)
-        showToast('Receita analisada com sucesso!')
-      } catch {
-        showToast('Não foi possível analisar a imagem')
-      } finally {
-        setAnalyzing(false)
-      }
+    if (!apiKey) {
+      showToast('Adiciona a chave Gemini nas Definições para preenchimento automático')
+      return
+    }
+
+    const [header, base64] = dataUrl.split(',')
+    const mediaType = header.replace('data:', '').replace(';base64', '')
+
+    setAnalyzing(true)
+    showToast('Analisando imagem com IA...')
+    try {
+      const data = await analyzeRecipeImage(base64, mediaType, apiKey)
+      if (data.name) setName(data.name)
+      if (data.category && CATEGORIES.includes(data.category)) setCategory(data.category)
+      if (data.time) setTime(data.time)
+      if (data.servings) setServings(data.servings)
+      if (data.ingredients?.length) setIngredients(data.ingredients)
+      if (data.steps?.length) setSteps(data.steps)
+      showToast('Receita analisada com sucesso!')
+    } catch {
+      showToast('Não foi possível analisar a imagem')
+    } finally {
+      setAnalyzing(false)
     }
   }
 

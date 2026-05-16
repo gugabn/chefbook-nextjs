@@ -107,3 +107,19 @@ input, textarea, select {
 h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-playfair), 'Playfair Display', Georgia, serif;
 }
+
+/* Desktop: center the app in a phone-style frame.
+   The transform on .app-shell makes it the containing block for its
+   position:fixed descendants (bottom nav, modals), so they stay inside
+   the 430px frame instead of spanning the whole viewport. */
+@media (min-width: 600px) {
+  body {
+    background-color: #E4D9CD;
+  }
+  .app-shell {
+    max-width: 430px;
+    margin: 0 auto;
+    transform: translateZ(0);
+    box-shadow: 0 16px 50px rgba(44, 44, 44, 0.22);
+  }
+}

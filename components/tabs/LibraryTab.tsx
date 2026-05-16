@@ -108,7 +108,7 @@ function BookCard({ book, onClick }: { book: Book; onClick: () => void }) {
         {book.photo ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
-            src={`data:image/jpeg;base64,${book.photo}`}
+            src={book.photo}
             alt={book.title}
             style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }}
           />

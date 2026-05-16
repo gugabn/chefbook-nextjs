@@ -77,7 +77,7 @@ export default function AddBookModal({ isOpen, onClose, onSave }: AddBookModalPr
           <Label>Capa</Label>
           <PhotoUpload
             value={photo}
-            onChange={(b64) => setPhoto(b64)}
+            onChange={(dataUrl) => setPhoto(dataUrl)}
             ratio="3/4"
           />
         </div>

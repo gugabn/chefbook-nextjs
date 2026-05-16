@@ -144,6 +144,7 @@ export default function Page() {
   if (!hydrated) {
     return (
       <div
+        className="app-shell"
         style={{
           minHeight: '100dvh',
           display: 'flex',
@@ -185,7 +186,7 @@ export default function Page() {
   }
 
   return (
-    <div style={{ minHeight: '100dvh', backgroundColor: 'var(--bg)' }}>
+    <div className="app-shell" style={{ minHeight: '100dvh', backgroundColor: 'var(--bg)' }}>
       <Header
         onAdd={handleAdd}
         onSettings={() => setSettingsOpen(true)}
