@@ -146,7 +146,6 @@ export default function Page() {
       <div
         className="app-shell"
         style={{
-          minHeight: '100dvh',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
@@ -186,7 +185,7 @@ export default function Page() {
   }
 
   return (
-    <div className="app-shell" style={{ minHeight: '100dvh', backgroundColor: 'var(--bg)' }}>
+    <div className="app-shell" style={{ backgroundColor: 'var(--bg)' }}>
       <Header
         onAdd={handleAdd}
         onSettings={() => setSettingsOpen(true)}

@@ -27,6 +27,7 @@ body {
   color: var(--text);
   overscroll-behavior: none;
   -webkit-overflow-scrolling: touch;
+  height: 100%;
 }
 
 body {
@@ -54,11 +55,16 @@ body {
   scroll-behavior: smooth;
 }
 
-/* Prevent horizontal scroll */
-html,
+/* Prevent horizontal scroll — only on body to avoid iOS Safari sticky/fixed bugs */
 body {
   overflow-x: hidden;
   max-width: 100vw;
+}
+
+/* App shell fills viewport; dvh = dynamic viewport height (mobile toolbar-aware) */
+.app-shell {
+  min-height: 100vh;
+  min-height: 100dvh;
 }
 
 /* Custom animations */
