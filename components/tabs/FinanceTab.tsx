@@ -1,10 +1,15 @@
 'use client'
 
 import { useMemo } from 'react'
-import type { Contribution, FinanceGoal } from '@/lib/types'
+import type { Contribution, FinanceGoal, Milestone } from '@/lib/types'
 import {
   summarize,
-  milestones,
+  annuityTranches,
+  summarizeMilestones,
+  requiredSavingsRate,
+  formatPercent,
+  daysUntil,
+  formatDay,
   formatEur,
   formatEurCents,
   formatMonthYear,
@@ -13,18 +18,35 @@ import {
 interface FinanceTabProps {
   contributions: Contribution[]
   goal: FinanceGoal
+  milestones: Milestone[]
   onEditGoal: () => void
   onDeleteContribution: (id: string) => void
+  onAddMilestone: () => void
+  onEditMilestone: (milestone: Milestone) => void
+  onToggleMilestone: (id: string) => void
+  onDeleteMilestone: (id: string) => void
 }
 
 export default function FinanceTab({
   contributions,
   goal,
+  milestones,
   onEditGoal,
   onDeleteContribution,
+  onAddMilestone,
+  onEditMilestone,
+  onToggleMilestone,
+  onDeleteMilestone,
 }: FinanceTabProps) {
   const summary = useMemo(() => summarize(contributions, goal), [contributions, goal])
-  const stones = useMemo(() => milestones(summary.saved, goal), [summary.saved, goal])
+  const tranches = useMemo(() => annuityTranches(summary.saved, goal), [summary.saved, goal])
+  const mStats = useMemo(() => summarizeMilestones(milestones), [milestones])
+  const savingsRate = requiredSavingsRate(summary.requiredMonthly, goal.monthlySalary)
+
+  const sortedMilestones = useMemo(
+    () => [...milestones].sort((a, b) => (a.dueDate < b.dueDate ? -1 : a.dueDate > b.dueDate ? 1 : 0)),
+    [milestones],
+  )
 
   const sorted = useMemo(
     () => [...contributions].sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : b.createdAt - a.createdAt)),
@@ -104,6 +126,11 @@ export default function FinanceTab({
             </div>
           </div>
         )}
+
+        {/* Meta por salário */}
+        {!summary.reached && savingsRate !== null && (
+          <SalaryInsight rate={savingsRate} salary={goal.monthlySalary} required={summary.requiredMonthly} />
+        )}
       </section>
 
       {/* Projeção */}
@@ -134,7 +161,7 @@ export default function FinanceTab({
       <section style={cardStyle}>
         <CardTitle>Anuidades cobertas</CardTitle>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8 }}>
-          {stones.map(m => (
+          {tranches.map(m => (
             <div
               key={m.label}
               style={{
@@ -156,6 +183,48 @@ export default function FinanceTab({
         <button onClick={onEditGoal} style={editBtnStyle}>
           Editar meta e datas
         </button>
+      </section>
+
+      {/* Marcos / certificações */}
+      <section style={{ ...cardStyle, padding: 0, overflow: 'hidden' }}>
+        <div style={{ padding: '16px 16px 12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <CardTitle>Marcos e certificações</CardTitle>
+          <span style={{ fontSize: 12, color: 'var(--muted)' }}>
+            {mStats.doneCount}/{mStats.totalCount} feitos
+          </span>
+        </div>
+
+        {/* Resumo de custos */}
+        <div style={{ padding: '0 16px 12px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+          <Stat label="Custo total" value={formatEur(mStats.total)} sub="todas as etapas" />
+          <Stat
+            label="Por pagar"
+            value={formatEur(mStats.pending)}
+            sub={mStats.nextDue ? `próximo: ${mStats.nextDue.title}` : 'tudo tratado 🎉'}
+            color={mStats.pending > 0 ? 'var(--gold)' : 'var(--sage)'}
+          />
+        </div>
+
+        {sortedMilestones.length > 0 && (
+          <div style={{ borderTop: '1px solid var(--border)' }}>
+            {sortedMilestones.map((m, i) => (
+              <MilestoneRow
+                key={m.id}
+                milestone={m}
+                isLast={i === sortedMilestones.length - 1}
+                onToggle={() => onToggleMilestone(m.id)}
+                onEdit={() => onEditMilestone(m)}
+                onDelete={() => onDeleteMilestone(m.id)}
+              />
+            ))}
+          </div>
+        )}
+
+        <div style={{ padding: '12px 16px 16px' }}>
+          <button onClick={onAddMilestone} style={editBtnStyle}>
+            + Adicionar marco
+          </button>
+        </div>
       </section>
 
       {/* Lançamentos */}
@@ -441,6 +510,174 @@ function ContributionRow({
       </button>
     </div>
   )
+}
+
+// ── Meta por salário ─────────────────────────────────────────────────────────
+
+function SalaryInsight({
+  rate,
+  salary,
+  required,
+}: {
+  rate: number
+  salary: number
+  required: number
+}) {
+  const tough = rate > 1
+  const heavy = rate > 0.7 && rate <= 1
+  const color = tough ? '#E85D3A' : heavy ? 'var(--gold)' : 'var(--sage)'
+  const bg = tough ? 'rgba(232,93,58,0.10)' : heavy ? 'rgba(232,168,56,0.12)' : 'rgba(122,158,126,0.12)'
+
+  return (
+    <div style={{ marginTop: 14, padding: '12px 14px', borderRadius: 12, backgroundColor: bg }}>
+      <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 8 }}>
+        <span style={{ fontSize: 13, color: 'var(--muted)' }}>Do teu salário estimado</span>
+        <span style={{ fontSize: 20, fontWeight: 700, color }}>{formatPercent(rate)}</span>
+      </div>
+      <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 4, lineHeight: 1.45 }}>
+        {tough
+          ? `Precisas de ${formatEur(required)}/mês mas o salário estimado é ${formatEur(salary)}. Não chega — sobe o prazo, o salário ou baixa a meta.`
+          : `Poupar ${formatEur(required)} dos ${formatEur(salary)} que ganhas por mês chega para bateres o ritmo.`}
+      </div>
+    </div>
+  )
+}
+
+// ── Marco individual ─────────────────────────────────────────────────────────
+
+function MilestoneRow({
+  milestone,
+  isLast,
+  onToggle,
+  onEdit,
+  onDelete,
+}: {
+  milestone: Milestone
+  isLast: boolean
+  onToggle: () => void
+  onEdit: () => void
+  onDelete: () => void
+}) {
+  const days = daysUntil(milestone.dueDate)
+  const overdue = !milestone.done && days < 0
+  const soon = !milestone.done && days >= 0 && days <= 30
+
+  let dateColor = 'var(--muted)'
+  if (milestone.done) dateColor = 'var(--sage)'
+  else if (overdue) dateColor = '#E85D3A'
+  else if (soon) dateColor = 'var(--gold)'
+
+  let dateLabel = formatDay(milestone.dueDate)
+  if (!milestone.done) {
+    if (overdue) dateLabel += ` · ${Math.abs(days)}d atrasado`
+    else if (days === 0) dateLabel += ' · hoje'
+    else if (soon) dateLabel += ` · faltam ${days}d`
+  }
+
+  return (
+    <div
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        padding: '12px 16px',
+        gap: 12,
+        borderBottom: isLast ? 'none' : '1px solid var(--border)',
+      }}
+    >
+      {/* Checkbox */}
+      <button
+        onClick={onToggle}
+        aria-label={milestone.done ? 'Marcar por fazer' : 'Marcar como feito'}
+        style={{
+          width: 26,
+          height: 26,
+          minWidth: 26,
+          minHeight: 26,
+          borderRadius: '50%',
+          flexShrink: 0,
+          cursor: 'pointer',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: 0,
+          backgroundColor: milestone.done ? 'var(--sage)' : 'transparent',
+          border: milestone.done ? 'none' : '2px solid var(--border)',
+        }}
+      >
+        {milestone.done && (
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="20 6 9 17 4 12" />
+          </svg>
+        )}
+      </button>
+
+      {/* Info */}
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div
+          style={{
+            fontSize: 14,
+            fontWeight: 500,
+            color: milestone.done ? 'var(--muted)' : 'var(--text)',
+            textDecoration: milestone.done ? 'line-through' : 'none',
+            lineHeight: 1.3,
+          }}
+        >
+          {milestone.title}
+        </div>
+        <div style={{ fontSize: 12, color: dateColor, marginTop: 1, fontWeight: overdue || soon ? 600 : 400 }}>
+          {dateLabel}
+        </div>
+      </div>
+
+      {/* Custo */}
+      <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text)', whiteSpace: 'nowrap' }}>
+        {formatEur(milestone.cost)}
+      </div>
+
+      {/* Ações */}
+      <div style={{ display: 'flex', gap: 4, flexShrink: 0 }}>
+        <button
+          onClick={onEdit}
+          aria-label="Editar"
+          style={iconBtnStyle('var(--muted)')}
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+          </svg>
+        </button>
+        <button
+          onClick={onDelete}
+          aria-label="Eliminar"
+          style={iconBtnStyle('#E85D3A')}
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <polyline points="3 6 5 6 21 6" />
+            <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
+            <path d="M10 11v6M14 11v6" />
+            <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" />
+          </svg>
+        </button>
+      </div>
+    </div>
+  )
+}
+
+function iconBtnStyle(color: string): React.CSSProperties {
+  return {
+    width: 34,
+    height: 34,
+    minWidth: 34,
+    minHeight: 34,
+    borderRadius: 8,
+    border: '1px solid var(--border)',
+    backgroundColor: 'var(--surface)',
+    cursor: 'pointer',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    color,
+  }
 }
 
 // ── Blocos reutilizáveis ─────────────────────────────────────────────────────

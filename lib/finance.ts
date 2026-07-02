@@ -1,4 +1,4 @@
-import type { Contribution, FinanceGoal } from './types'
+import type { Contribution, FinanceGoal, Milestone } from './types'
 
 const MS_PER_MONTH = 1000 * 60 * 60 * 24 * (365.25 / 12)
 
@@ -148,7 +148,7 @@ export function summarize(
   }
 }
 
-export interface Milestone {
+export interface AnnuityTranche {
   label: string
   amount: number     // limiar cumulativo
   reached: boolean
@@ -158,7 +158,7 @@ export interface Milestone {
  * Divide a meta em fatias iguais (ex.: 4 anuidades da Basque), marcando as
  * que o saldo atual já cobre.
  */
-export function milestones(saved: number, goal: FinanceGoal, slices = 4): Milestone[] {
+export function annuityTranches(saved: number, goal: FinanceGoal, slices = 4): AnnuityTranche[] {
   const per = goal.targetAmount / slices
   return Array.from({ length: slices }, (_, i) => {
     const amount = per * (i + 1)
@@ -168,4 +168,59 @@ export function milestones(saved: number, goal: FinanceGoal, slices = 4): Milest
       reached: saved >= amount - 0.01,
     }
   })
+}
+
+/**
+ * Percentagem do salário mensal que precisas de poupar para bateres o ritmo.
+ * Devolve null se não houver salário estimado.
+ */
+export function requiredSavingsRate(requiredMonthly: number, monthlySalary: number): number | null {
+  if (monthlySalary <= 0) return null
+  return requiredMonthly / monthlySalary
+}
+
+export function formatPercent(rate: number): string {
+  return `${Math.round(rate * 100)}%`
+}
+
+// ── Marcos / certificações ──────────────────────────────────────────────────
+
+export interface MilestoneSummary {
+  total: number       // custo de todos os marcos
+  paid: number        // custo dos marcos concluídos
+  pending: number     // custo dos marcos por fazer
+  doneCount: number
+  totalCount: number
+  nextDue: Milestone | null // próximo marco por fazer, por data
+}
+
+export function summarizeMilestones(milestones: Milestone[]): MilestoneSummary {
+  const total = milestones.reduce((s, m) => s + m.cost, 0)
+  const paid = milestones.filter(m => m.done).reduce((s, m) => s + m.cost, 0)
+  const doneCount = milestones.filter(m => m.done).length
+
+  const upcoming = milestones
+    .filter(m => !m.done)
+    .sort((a, b) => (a.dueDate < b.dueDate ? -1 : a.dueDate > b.dueDate ? 1 : 0))
+
+  return {
+    total,
+    paid,
+    pending: total - paid,
+    doneCount,
+    totalCount: milestones.length,
+    nextDue: upcoming[0] ?? null,
+  }
+}
+
+/** Dias até (ou desde) uma data; negativo = atrasado. */
+export function daysUntil(iso: string, now: Date = new Date()): number {
+  const target = new Date(`${iso}T12:00:00`).getTime()
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime()
+  return Math.round((target - today) / (1000 * 60 * 60 * 24))
+}
+
+export function formatDay(iso: string): string {
+  return new Intl.DateTimeFormat('pt-PT', { day: '2-digit', month: 'short', year: 'numeric' })
+    .format(new Date(`${iso}T12:00:00`))
 }

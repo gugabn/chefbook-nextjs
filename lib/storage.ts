@@ -1,5 +1,5 @@
-import type { Recipe, Book, PantryItem, Contribution, FinanceGoal } from './types'
-import { DEFAULT_GOAL } from './types'
+import type { Recipe, Book, PantryItem, Contribution, FinanceGoal, Milestone } from './types'
+import { DEFAULT_GOAL, DEFAULT_MILESTONES } from './types'
 
 const isBrowser = typeof window !== 'undefined'
 
@@ -87,6 +87,25 @@ export function getFinanceGoal(): FinanceGoal {
 export function saveFinanceGoal(goal: FinanceGoal): void {
   if (!isBrowser) return
   localStorage.setItem('chefbook_finance_goal', JSON.stringify(goal))
+}
+
+// ── Finanças: marcos / certificações ────────────────────────────────────────
+
+export function getMilestones(): Milestone[] {
+  if (!isBrowser) return DEFAULT_MILESTONES
+  try {
+    const raw = localStorage.getItem('chefbook_milestones')
+    // Chave ausente = primeira utilização → semear os marcos do plano.
+    // Um array vazio guardado (o utilizador apagou tudo) é respeitado.
+    return raw === null ? DEFAULT_MILESTONES : (JSON.parse(raw) as Milestone[])
+  } catch {
+    return DEFAULT_MILESTONES
+  }
+}
+
+export function saveMilestones(milestones: Milestone[]): void {
+  if (!isBrowser) return
+  localStorage.setItem('chefbook_milestones', JSON.stringify(milestones))
 }
 
 // ── API Key ───────────────────────────────────────────────────────────────────

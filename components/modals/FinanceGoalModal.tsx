@@ -16,6 +16,7 @@ export default function FinanceGoalModal({ isOpen, onClose, goal, onSave }: Fina
   const [startDate, setStartDate] = useState('')
   const [targetDate, setTargetDate] = useState('')
   const [monthly, setMonthly] = useState('')
+  const [salary, setSalary] = useState('')
 
   useEffect(() => {
     if (isOpen) {
@@ -23,6 +24,7 @@ export default function FinanceGoalModal({ isOpen, onClose, goal, onSave }: Fina
       setStartDate(goal.startDate)
       setTargetDate(goal.targetDate)
       setMonthly(String(goal.plannedMonthly))
+      setSalary(String(goal.monthlySalary))
     }
   }, [isOpen, goal])
 
@@ -37,6 +39,7 @@ export default function FinanceGoalModal({ isOpen, onClose, goal, onSave }: Fina
       startDate,
       targetDate,
       plannedMonthly: parseFloat(monthly.replace(',', '.')) || 0,
+      monthlySalary: parseFloat(salary.replace(',', '.')) || 0,
     })
     onClose()
   }
@@ -115,6 +118,20 @@ export default function FinanceGoalModal({ isOpen, onClose, goal, onSave }: Fina
             style={inputStyle}
           />
           <Hint>Nos cruzeiros não há custos de vida — dá para poupar quase tudo.</Hint>
+        </div>
+
+        <div>
+          <Label>Salário mensal estimado (€)</Label>
+          <input
+            type="number"
+            inputMode="decimal"
+            min="0"
+            step="50"
+            value={salary}
+            onChange={e => setSalary(e.target.value)}
+            style={inputStyle}
+          />
+          <Hint>Usado para calcular que % do salário precisas de poupar. Ajusta ao teu caso.</Hint>
         </div>
       </div>
     </Sheet>
