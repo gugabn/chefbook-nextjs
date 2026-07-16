@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { useStore } from '@/hooks/useStore'
-import type { Recipe, Book, PantryItem, Milestone } from '@/lib/types'
+import type { Recipe, Book, PantryItem } from '@/lib/types'
 
 import Header from '@/components/Header'
 import BottomNav from '@/components/BottomNav'
@@ -11,7 +11,6 @@ import Toast from '@/components/ui/Toast'
 import RecipesTab from '@/components/tabs/RecipesTab'
 import LibraryTab from '@/components/tabs/LibraryTab'
 import PantryTab from '@/components/tabs/PantryTab'
-import FinanceTab from '@/components/tabs/FinanceTab'
 
 import AddRecipeModal from '@/components/modals/AddRecipeModal'
 import RecipeDetailModal from '@/components/modals/RecipeDetailModal'
@@ -20,11 +19,8 @@ import BookDetailModal from '@/components/modals/BookDetailModal'
 import AddPantryModal from '@/components/modals/AddPantryModal'
 import ShoppingListModal from '@/components/modals/ShoppingListModal'
 import SettingsModal from '@/components/modals/SettingsModal'
-import AddContributionModal from '@/components/modals/AddContributionModal'
-import FinanceGoalModal from '@/components/modals/FinanceGoalModal'
-import AddMilestoneModal from '@/components/modals/AddMilestoneModal'
 
-type Tab = 'receitas' | 'biblioteca' | 'despensa' | 'financas'
+type Tab = 'receitas' | 'biblioteca' | 'despensa'
 
 export default function Page() {
   const {
@@ -32,9 +28,6 @@ export default function Page() {
     recipes, addRecipe, updateRecipe, deleteRecipe,
     books, addBook, deleteBook,
     pantry, addPantryItem, updatePantryItem, deletePantryItem,
-    contributions, addContribution, deleteContribution,
-    financeGoal, setFinanceGoal,
-    milestones, addMilestone, updateMilestone, toggleMilestone, deleteMilestone,
     apiKey, setApiKey,
   } = useStore()
 
@@ -57,11 +50,6 @@ export default function Page() {
   const [shoppingOpen, setShoppingOpen] = useState(false)
 
   const [settingsOpen, setSettingsOpen] = useState(false)
-
-  const [addContributionOpen, setAddContributionOpen] = useState(false)
-  const [financeGoalOpen, setFinanceGoalOpen] = useState(false)
-  const [milestoneModalOpen, setMilestoneModalOpen] = useState(false)
-  const [editMilestone, setEditMilestone] = useState<Milestone | undefined>(undefined)
 
   // Toast
   const [toastMsg, setToastMsg] = useState('')
@@ -89,52 +77,10 @@ export default function Page() {
       setAddRecipeOpen(true)
     } else if (activeTab === 'biblioteca') {
       setAddBookOpen(true)
-    } else if (activeTab === 'financas') {
-      setAddContributionOpen(true)
     } else {
       setEditPantry(undefined)
       setAddPantryOpen(true)
     }
-  }
-
-  const handleSaveContribution = (contribution: Parameters<typeof addContribution>[0]) => {
-    addContribution(contribution)
-    showToast(contribution.type === 'deposito' ? 'Depósito registado!' : 'Levantamento registado')
-  }
-
-  const handleDeleteContribution = (id: string) => {
-    deleteContribution(id)
-    showToast('Lançamento eliminado')
-  }
-
-  const handleSaveGoal = (goal: Parameters<typeof setFinanceGoal>[0]) => {
-    setFinanceGoal(goal)
-    showToast('Meta atualizada!')
-  }
-
-  const handleAddMilestone = () => {
-    setEditMilestone(undefined)
-    setMilestoneModalOpen(true)
-  }
-
-  const handleEditMilestone = (milestone: Milestone) => {
-    setEditMilestone(milestone)
-    setMilestoneModalOpen(true)
-  }
-
-  const handleSaveMilestone = (milestone: Milestone) => {
-    if (editMilestone) {
-      updateMilestone(milestone)
-      showToast('Marco atualizado!')
-    } else {
-      addMilestone(milestone)
-      showToast('Marco adicionado!')
-    }
-  }
-
-  const handleDeleteMilestone = (id: string) => {
-    deleteMilestone(id)
-    showToast('Marco eliminado')
   }
 
   const handleSaveRecipe = (recipe: Recipe) => {
@@ -274,19 +220,6 @@ export default function Page() {
             onDeleteItem={handleDeletePantry}
           />
         )}
-        {activeTab === 'financas' && (
-          <FinanceTab
-            contributions={contributions}
-            goal={financeGoal}
-            milestones={milestones}
-            onEditGoal={() => setFinanceGoalOpen(true)}
-            onDeleteContribution={handleDeleteContribution}
-            onAddMilestone={handleAddMilestone}
-            onEditMilestone={handleEditMilestone}
-            onToggleMilestone={toggleMilestone}
-            onDeleteMilestone={handleDeleteMilestone}
-          />
-        )}
       </main>
 
       <BottomNav activeTab={activeTab} onChange={setActiveTab} />
@@ -342,26 +275,6 @@ export default function Page() {
         onClose={() => setSettingsOpen(false)}
         apiKey={apiKey}
         onSave={setApiKey}
-      />
-
-      <AddContributionModal
-        isOpen={addContributionOpen}
-        onClose={() => setAddContributionOpen(false)}
-        onSave={handleSaveContribution}
-      />
-
-      <FinanceGoalModal
-        isOpen={financeGoalOpen}
-        onClose={() => setFinanceGoalOpen(false)}
-        goal={financeGoal}
-        onSave={handleSaveGoal}
-      />
-
-      <AddMilestoneModal
-        isOpen={milestoneModalOpen}
-        onClose={() => setMilestoneModalOpen(false)}
-        onSave={handleSaveMilestone}
-        initialData={editMilestone}
       />
 
       <Toast message={toastMsg} visible={toastVisible} />

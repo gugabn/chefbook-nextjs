@@ -1,15 +1,11 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import type { Recipe, Book, PantryItem, Contribution, FinanceGoal, Milestone } from '@/lib/types'
-import { DEFAULT_GOAL } from '@/lib/types'
+import type { Recipe, Book, PantryItem } from '@/lib/types'
 import {
   getRecipes, saveRecipes,
   getBooks, saveBooks,
   getPantry, savePantry,
-  getContributions, saveContributions,
-  getFinanceGoal, saveFinanceGoal,
-  getMilestones, saveMilestones,
   getApiKey, saveApiKey,
 } from '@/lib/storage'
 
@@ -17,9 +13,6 @@ export function useStore() {
   const [recipes, setRecipes] = useState<Recipe[]>([])
   const [books, setBooks] = useState<Book[]>([])
   const [pantry, setPantry] = useState<PantryItem[]>([])
-  const [contributions, setContributions] = useState<Contribution[]>([])
-  const [financeGoal, setFinanceGoalState] = useState<FinanceGoal>(DEFAULT_GOAL)
-  const [milestones, setMilestones] = useState<Milestone[]>([])
   const [apiKey, setApiKeyState] = useState<string>('')
   const [hydrated, setHydrated] = useState(false)
 
@@ -28,9 +21,6 @@ export function useStore() {
     setRecipes(getRecipes())
     setBooks(getBooks())
     setPantry(getPantry())
-    setContributions(getContributions())
-    setFinanceGoalState(getFinanceGoal())
-    setMilestones(getMilestones())
     setApiKeyState(getApiKey())
     setHydrated(true)
   }, [])
@@ -105,65 +95,6 @@ export function useStore() {
     })
   }, [])
 
-  // ── Contribuições ────────────────────────────────────────────────────────────
-
-  const addContribution = useCallback((contribution: Contribution) => {
-    setContributions(prev => {
-      const next = [contribution, ...prev]
-      saveContributions(next)
-      return next
-    })
-  }, [])
-
-  const deleteContribution = useCallback((id: string) => {
-    setContributions(prev => {
-      const next = prev.filter(c => c.id !== id)
-      saveContributions(next)
-      return next
-    })
-  }, [])
-
-  // ── Meta financeira ──────────────────────────────────────────────────────────
-
-  const setFinanceGoal = useCallback((goal: FinanceGoal) => {
-    saveFinanceGoal(goal)
-    setFinanceGoalState(goal)
-  }, [])
-
-  // ── Marcos / certificações ───────────────────────────────────────────────────
-
-  const addMilestone = useCallback((milestone: Milestone) => {
-    setMilestones(prev => {
-      const next = [...prev, milestone]
-      saveMilestones(next)
-      return next
-    })
-  }, [])
-
-  const updateMilestone = useCallback((milestone: Milestone) => {
-    setMilestones(prev => {
-      const next = prev.map(m => (m.id === milestone.id ? milestone : m))
-      saveMilestones(next)
-      return next
-    })
-  }, [])
-
-  const toggleMilestone = useCallback((id: string) => {
-    setMilestones(prev => {
-      const next = prev.map(m => (m.id === id ? { ...m, done: !m.done } : m))
-      saveMilestones(next)
-      return next
-    })
-  }, [])
-
-  const deleteMilestone = useCallback((id: string) => {
-    setMilestones(prev => {
-      const next = prev.filter(m => m.id !== id)
-      saveMilestones(next)
-      return next
-    })
-  }, [])
-
   // ── API Key ────────────────────────────────────────────────────────────────
 
   const setApiKey = useCallback((key: string) => {
@@ -176,9 +107,6 @@ export function useStore() {
     recipes,
     books,
     pantry,
-    contributions,
-    financeGoal,
-    milestones,
     apiKey,
     addRecipe,
     updateRecipe,
@@ -188,13 +116,6 @@ export function useStore() {
     addPantryItem,
     updatePantryItem,
     deletePantryItem,
-    addContribution,
-    deleteContribution,
-    setFinanceGoal,
-    addMilestone,
-    updateMilestone,
-    toggleMilestone,
-    deleteMilestone,
     setApiKey,
   }
 }

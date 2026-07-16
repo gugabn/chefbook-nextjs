@@ -15,7 +15,7 @@ import {
   formatMonthYear,
 } from '@/lib/finance'
 
-interface FinanceTabProps {
+interface FinanceViewProps {
   contributions: Contribution[]
   goal: FinanceGoal
   milestones: Milestone[]
@@ -27,7 +27,7 @@ interface FinanceTabProps {
   onDeleteMilestone: (id: string) => void
 }
 
-export default function FinanceTab({
+export default function FinanceView({
   contributions,
   goal,
   milestones,
@@ -37,7 +37,7 @@ export default function FinanceTab({
   onEditMilestone,
   onToggleMilestone,
   onDeleteMilestone,
-}: FinanceTabProps) {
+}: FinanceViewProps) {
   const summary = useMemo(() => summarize(contributions, goal), [contributions, goal])
   const tranches = useMemo(() => annuityTranches(summary.saved, goal), [summary.saved, goal])
   const mStats = useMemo(() => summarizeMilestones(milestones), [milestones])

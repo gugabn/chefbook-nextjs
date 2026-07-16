@@ -12,8 +12,6 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
-    // Nested standalone app — has its own toolchain.
-    "rumo-basque/**",
   ]),
 ]);
 

@@ -3,16 +3,9 @@
 interface HeaderProps {
   onAdd: () => void
   onSettings: () => void
-  activeTab: string
 }
 
-const TAB_TITLES: Record<string, string> = {
-  receitas: 'Receitas',
-  biblioteca: 'Biblioteca',
-  despensa: 'Despensa',
-}
-
-export default function Header({ onAdd, onSettings, activeTab }: HeaderProps) {
+export default function Header({ onAdd, onSettings }: HeaderProps) {
   return (
     <header
       style={{
@@ -63,10 +56,10 @@ export default function Header({ onAdd, onSettings, activeTab }: HeaderProps) {
                 lineHeight: 1,
               }}
             >
-              ChefBook
+              Rumo à Basque
             </span>
             <div style={{ fontSize: 11, color: 'var(--muted)', marginTop: 1 }}>
-              {TAB_TITLES[activeTab] ?? ''}
+              Poupança para a Basque Culinary
             </div>
           </div>
         </div>
@@ -98,7 +91,7 @@ export default function Header({ onAdd, onSettings, activeTab }: HeaderProps) {
 
           <button
             onClick={onAdd}
-            aria-label="Adicionar"
+            aria-label="Adicionar lançamento"
             style={{
               width: 40,
               height: 40,

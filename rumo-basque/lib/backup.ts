@@ -1,17 +1,16 @@
-// Exportar / importar todos os dados do ChefBook como um ficheiro JSON.
+// Exportar / importar todos os dados do Rumo à Basque como um ficheiro JSON.
 // Fica tudo no dispositivo — o backup é só para o utilizador guardar/mover.
 
 const isBrowser = typeof window !== 'undefined'
 
-// Chaves incluídas no backup. A API key é deixada de fora de propósito,
-// para não acabar num ficheiro que possa ser partilhado.
+// Chaves incluídas no backup.
 const BACKUP_KEYS = [
-  'chefbook_recipes',
-  'chefbook_books',
-  'chefbook_pantry',
+  'rumobasque_contributions',
+  'rumobasque_goal',
+  'rumobasque_milestones',
 ] as const
 
-const BACKUP_FORMAT = 'chefbook-backup'
+const BACKUP_FORMAT = 'rumo-basque-backup'
 const BACKUP_VERSION = 1
 
 interface BackupFile {
@@ -53,7 +52,7 @@ export function downloadBackup(): void {
   const stamp = new Date().toISOString().slice(0, 10)
   const a = document.createElement('a')
   a.href = url
-  a.download = `chefbook-backup-${stamp}.json`
+  a.download = `rumo-basque-backup-${stamp}.json`
   document.body.appendChild(a)
   a.click()
   a.remove()
@@ -81,7 +80,7 @@ export function importBackup(fileText: string): ImportResult {
 
   const backup = parsed as Partial<BackupFile>
   if (!backup || backup.format !== BACKUP_FORMAT || typeof backup.data !== 'object') {
-    return { ok: false, restored: 0, error: 'Este ficheiro não é um backup do ChefBook.' }
+    return { ok: false, restored: 0, error: 'Este ficheiro não é um backup do Rumo à Basque.' }
   }
 
   let restored = 0
