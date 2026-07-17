@@ -193,7 +193,7 @@ export default function SettingsModal({ isOpen, onClose, apiKey, onSave }: Setti
             Cópia de segurança
           </div>
           <div style={{ fontSize: 12, color: 'var(--muted)', marginBottom: 10, lineHeight: 1.5 }}>
-            Exporta um ficheiro com receitas, biblioteca, despensa e finanças
+            Exporta um ficheiro com receitas, biblioteca e despensa
             para o guardares ou passares para outro telemóvel. A API key não é incluída.
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>

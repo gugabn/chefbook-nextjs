@@ -9,9 +9,6 @@ const BACKUP_KEYS = [
   'chefbook_recipes',
   'chefbook_books',
   'chefbook_pantry',
-  'chefbook_contributions',
-  'chefbook_finance_goal',
-  'chefbook_milestones',
 ] as const
 
 const BACKUP_FORMAT = 'chefbook-backup'

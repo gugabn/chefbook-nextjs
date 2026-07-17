@@ -10,7 +10,6 @@ const TAB_TITLES: Record<string, string> = {
   receitas: 'Receitas',
   biblioteca: 'Biblioteca',
   despensa: 'Despensa',
-  financas: 'Rumo à Basque',
 }
 
 export default function Header({ onAdd, onSettings, activeTab }: HeaderProps) {
