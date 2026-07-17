@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react'
 import type { Contribution, FinanceGoal, Milestone } from '@/lib/types'
 import { DEFAULT_GOAL } from '@/lib/types'
 import {
+  migrateLegacyData,
   getContributions, saveContributions,
   getFinanceGoal, saveFinanceGoal,
   getMilestones, saveMilestones,
@@ -17,6 +18,7 @@ export function useStore() {
 
   // Hydrate from localStorage on mount
   useEffect(() => {
+    migrateLegacyData() // importa dados antigos do ChefBook, se existirem
     setContributions(getContributions())
     setFinanceGoalState(getFinanceGoal())
     setMilestones(getMilestones())

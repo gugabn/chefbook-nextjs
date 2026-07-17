@@ -52,5 +52,19 @@ Guardados no `localStorage` sob as chaves `rumobasque_contributions`,
 `rumobasque_goal` e `rumobasque_milestones`. O backup é um ficheiro
 `rumo-basque-backup-AAAA-MM-DD.json`.
 
-> Nota: como é uma app separada (origem/domínio próprios), os dados que existiam
-> no separador Finanças do ChefBook não migram automaticamente.
+### Migração do ChefBook
+
+No primeiro arranque, a app importa uma única vez os dados que existiam no
+separador Finanças do ChefBook (chaves `chefbook_contributions`,
+`chefbook_finance_goal` e `chefbook_milestones`) para as chaves novas
+`rumobasque_*`. Ver `migrateLegacyData()` em `lib/storage.ts`.
+
+A importação é **por-chave e não-destrutiva**: só copia uma chave antiga se a
+correspondente nova ainda não existir, por isso nunca sobrescreve dados já
+criados aqui.
+
+> Ressalva: o `localStorage` é por origem. A importação só encontra os dados
+> antigos se as duas apps correrem na **mesma origem** — por exemplo ambas em
+> `localhost:3000` durante o desenvolvimento, ou publicadas no mesmo domínio.
+> Em origens diferentes não há dados antigos a ler, e a app arranca com os
+> valores por defeito.

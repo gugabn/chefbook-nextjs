@@ -3,6 +3,33 @@ import { DEFAULT_GOAL, DEFAULT_MILESTONES } from './types'
 
 const isBrowser = typeof window !== 'undefined'
 
+// ── Migração do ChefBook ──────────────────────────────────────────────────────
+// As finanças viveram como separador do ChefBook, sob chaves `chefbook_*`.
+// Se as apps partilharem a mesma origem (ex.: localhost:3000 ou o mesmo
+// domínio), importa uma única vez os dados antigos para as chaves novas.
+// Por-chave e não-destrutivo: só copia se a chave nova ainda não existir,
+// por isso nunca sobrescreve dados já criados no Rumo à Basque.
+
+const LEGACY_MAP: ReadonlyArray<readonly [newKey: string, oldKey: string]> = [
+  ['rumobasque_contributions', 'chefbook_contributions'],
+  ['rumobasque_goal', 'chefbook_finance_goal'],
+  ['rumobasque_milestones', 'chefbook_milestones'],
+]
+
+export function migrateLegacyData(): void {
+  if (!isBrowser) return
+  try {
+    for (const [newKey, oldKey] of LEGACY_MAP) {
+      if (localStorage.getItem(newKey) === null) {
+        const legacy = localStorage.getItem(oldKey)
+        if (legacy !== null) localStorage.setItem(newKey, legacy)
+      }
+    }
+  } catch {
+    // localStorage indisponível/bloqueado — segue com os dados que houver.
+  }
+}
+
 // ── Contribuições ─────────────────────────────────────────────────────────────
 
 export function getContributions(): Contribution[] {
