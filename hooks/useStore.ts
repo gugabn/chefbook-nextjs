@@ -30,24 +30,24 @@ export function useStore() {
   const addRecipe = useCallback((recipe: Recipe) => {
     setRecipes(prev => {
       const next = [recipe, ...prev]
-      saveRecipes(next)
-      return next
+      // Se não coube no armazenamento, fica tudo como estava
+      return saveRecipes(next) ? next : prev
     })
   }, [])
 
   const updateRecipe = useCallback((recipe: Recipe) => {
     setRecipes(prev => {
       const next = prev.map(r => (r.id === recipe.id ? recipe : r))
-      saveRecipes(next)
-      return next
+      // Se não coube no armazenamento, fica tudo como estava
+      return saveRecipes(next) ? next : prev
     })
   }, [])
 
   const deleteRecipe = useCallback((id: string) => {
     setRecipes(prev => {
       const next = prev.filter(r => r.id !== id)
-      saveRecipes(next)
-      return next
+      // Se não coube no armazenamento, fica tudo como estava
+      return saveRecipes(next) ? next : prev
     })
   }, [])
 
@@ -56,16 +56,16 @@ export function useStore() {
   const addBook = useCallback((book: Book) => {
     setBooks(prev => {
       const next = [book, ...prev]
-      saveBooks(next)
-      return next
+      // Se não coube no armazenamento, fica tudo como estava
+      return saveBooks(next) ? next : prev
     })
   }, [])
 
   const deleteBook = useCallback((id: string) => {
     setBooks(prev => {
       const next = prev.filter(b => b.id !== id)
-      saveBooks(next)
-      return next
+      // Se não coube no armazenamento, fica tudo como estava
+      return saveBooks(next) ? next : prev
     })
   }, [])
 
@@ -74,24 +74,24 @@ export function useStore() {
   const addPantryItem = useCallback((item: PantryItem) => {
     setPantry(prev => {
       const next = [item, ...prev]
-      savePantry(next)
-      return next
+      // Se não coube no armazenamento, fica tudo como estava
+      return savePantry(next) ? next : prev
     })
   }, [])
 
   const updatePantryItem = useCallback((item: PantryItem) => {
     setPantry(prev => {
       const next = prev.map(p => (p.id === item.id ? item : p))
-      savePantry(next)
-      return next
+      // Se não coube no armazenamento, fica tudo como estava
+      return savePantry(next) ? next : prev
     })
   }, [])
 
   const deletePantryItem = useCallback((id: string) => {
     setPantry(prev => {
       const next = prev.filter(p => p.id !== id)
-      savePantry(next)
-      return next
+      // Se não coube no armazenamento, fica tudo como estava
+      return savePantry(next) ? next : prev
     })
   }, [])
 
