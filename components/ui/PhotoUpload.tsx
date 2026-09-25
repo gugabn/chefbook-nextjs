@@ -1,6 +1,7 @@
 'use client'
 
 import { useRef } from 'react'
+import { compressImage } from '@/lib/image'
 
 interface PhotoUploadProps {
   value: string
@@ -13,13 +14,10 @@ export default function PhotoUpload({ value, onChange, ratio = '16/9' }: PhotoUp
 
   const paddingTop = ratio === '16/9' ? '56.25%' : '133.33%'
 
-  const handleFile = (file: File) => {
-    const reader = new FileReader()
-    reader.onload = (e) => {
-      // result is a complete data URL: "data:image/png;base64,..."
-      onChange(e.target?.result as string)
-    }
-    reader.readAsDataURL(file)
+  const handleFile = async (file: File) => {
+    // Reduz a foto antes de a guardar, para não encher o localStorage.
+    // O resultado é um data URL completo: "data:image/jpeg;base64,..."
+    onChange(await compressImage(file))
   }
 
   return (

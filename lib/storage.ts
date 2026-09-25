@@ -2,6 +2,26 @@ import type { Recipe, Book, PantryItem } from './types'
 
 const isBrowser = typeof window !== 'undefined'
 
+// Evento disparado quando o localStorage está cheio (~5 MB por site).
+// A página ouve-o e mostra um aviso ao utilizador.
+export const STORAGE_FULL_EVENT = 'chefbook:storage-full'
+
+/**
+ * Grava no localStorage sem rebentar a app.
+ * Devolve false se não conseguiu (normalmente por falta de espaço).
+ */
+function safeSave(key: string, value: unknown): boolean {
+  try {
+    localStorage.setItem(key, JSON.stringify(value))
+    return true
+  } catch {
+    // setTimeout: avisamos "a seguir" para não mexer no estado do React
+    // a meio de uma atualização.
+    setTimeout(() => window.dispatchEvent(new Event(STORAGE_FULL_EVENT)), 0)
+    return false
+  }
+}
+
 // ── Recipes ──────────────────────────────────────────────────────────────────
 
 export function getRecipes(): Recipe[] {
@@ -14,9 +34,9 @@ export function getRecipes(): Recipe[] {
   }
 }
 
-export function saveRecipes(recipes: Recipe[]): void {
-  if (!isBrowser) return
-  localStorage.setItem('chefbook_recipes', JSON.stringify(recipes))
+export function saveRecipes(recipes: Recipe[]): boolean {
+  if (!isBrowser) return false
+  return safeSave('chefbook_recipes', recipes)
 }
 
 // ── Books ─────────────────────────────────────────────────────────────────────
@@ -31,9 +51,9 @@ export function getBooks(): Book[] {
   }
 }
 
-export function saveBooks(books: Book[]): void {
-  if (!isBrowser) return
-  localStorage.setItem('chefbook_books', JSON.stringify(books))
+export function saveBooks(books: Book[]): boolean {
+  if (!isBrowser) return false
+  return safeSave('chefbook_books', books)
 }
 
 // ── Pantry ────────────────────────────────────────────────────────────────────
@@ -48,9 +68,9 @@ export function getPantry(): PantryItem[] {
   }
 }
 
-export function savePantry(pantry: PantryItem[]): void {
-  if (!isBrowser) return
-  localStorage.setItem('chefbook_pantry', JSON.stringify(pantry))
+export function savePantry(pantry: PantryItem[]): boolean {
+  if (!isBrowser) return false
+  return safeSave('chefbook_pantry', pantry)
 }
 
 // ── API Key ───────────────────────────────────────────────────────────────────

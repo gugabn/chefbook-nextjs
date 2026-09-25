@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { useStore } from '@/hooks/useStore'
 import type { Recipe, Book, PantryItem } from '@/lib/types'
+import { STORAGE_FULL_EVENT } from '@/lib/storage'
 
 import Header from '@/components/Header'
 import BottomNav from '@/components/BottomNav'
@@ -70,6 +71,14 @@ export default function Page() {
       if (toastTimerRef.current) clearTimeout(toastTimerRef.current)
     }
   }, [])
+
+  // Avisa quando o localStorage está cheio e a última alteração não foi guardada
+  useEffect(() => {
+    const onStorageFull = () =>
+      showToast('Sem espaço: a alteração não foi guardada. Apaga fotos antigas ou faz backup.')
+    window.addEventListener(STORAGE_FULL_EVENT, onStorageFull)
+    return () => window.removeEventListener(STORAGE_FULL_EVENT, onStorageFull)
+  }, [showToast])
 
   const handleAdd = () => {
     if (activeTab === 'receitas') {
