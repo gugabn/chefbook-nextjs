@@ -18,6 +18,12 @@ const DIFFICULTY_COLOR: Record<string, string> = {
   Difícil: '#E85D3A',
 }
 
+const DIFFICULTY_BG: Record<string, string> = {
+  Fácil: '#EEF5EE',
+  Médio: '#FEF6E6',
+  Difícil: '#FEE2D5',
+}
+
 export default function RecipeSuggestionsModal({
   isOpen,
   onClose,
@@ -31,9 +37,11 @@ export default function RecipeSuggestionsModal({
 
   useEffect(() => {
     if (!isOpen) return
+
     setSuggestions([])
     setError(null)
     setExpanded(null)
+    setLoading(false)
 
     if (!apiKey) {
       setError('Configura a tua chave Gemini nas definições para usar esta funcionalidade.')
@@ -45,31 +53,34 @@ export default function RecipeSuggestionsModal({
       return
     }
 
+    const controller = new AbortController()
     setLoading(true)
+
     suggestRecipesFromPantry(pantry, apiKey)
-      .then(setSuggestions)
-      .catch(err => setError(err instanceof Error ? err.message : 'Erro ao gerar sugestões.'))
-      .finally(() => setLoading(false))
-  }, [isOpen])
+      .then(result => { if (!controller.signal.aborted) setSuggestions(result) })
+      .catch(err => { if (!controller.signal.aborted) setError(err instanceof Error ? err.message : 'Erro ao gerar sugestões.') })
+      .finally(() => { if (!controller.signal.aborted) setLoading(false) })
+
+    return () => controller.abort()
+  }, [isOpen, apiKey, pantry])
 
   return (
     <Sheet isOpen={isOpen} onClose={onClose} title="Sugestões da despensa">
       {loading && (
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16, padding: '40px 0' }}>
           <div
+            className="animate-spin"
             style={{
               width: 44,
               height: 44,
               borderRadius: '50%',
               border: '3px solid var(--border)',
               borderTopColor: 'var(--primary)',
-              animation: 'spin 0.8s linear infinite',
             }}
           />
           <p style={{ margin: 0, fontSize: 14, color: 'var(--muted)', textAlign: 'center' }}>
             A analisar a tua despensa…
           </p>
-          <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
         </div>
       )}
 
@@ -113,7 +124,8 @@ function SuggestionCard({
   expanded: boolean
   onToggle: () => void
 }) {
-  const diffColor = DIFFICULTY_COLOR[suggestion.difficulty] ?? 'var(--muted)'
+  const diffColor = DIFFICULTY_COLOR[suggestion.difficulty] ?? '#6B6B6B'
+  const diffBg = DIFFICULTY_BG[suggestion.difficulty] ?? 'var(--surface2)'
 
   return (
     <div
@@ -151,7 +163,7 @@ function SuggestionCard({
                 fontSize: 11,
                 fontWeight: 600,
                 color: diffColor,
-                backgroundColor: diffColor + '18',
+                backgroundColor: diffBg,
                 padding: '2px 8px',
                 borderRadius: 6,
               }}

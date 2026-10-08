@@ -88,9 +88,14 @@ body {
   to   { transform: translateY(0);    opacity: 1; }
 }
 
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
 .animate-fadeIn   { animation: fadeIn  0.2s ease-out; }
 .animate-slideUp  { animation: slideUp 0.35s cubic-bezier(0.32, 0.72, 0, 1); }
 .animate-toastIn  { animation: toastIn 0.3s ease-out; }
+.animate-spin     { animation: spin 0.8s linear infinite; }
 
 /* Touch targets */
 button, a, [role="button"] {
