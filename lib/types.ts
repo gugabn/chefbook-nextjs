@@ -33,3 +33,13 @@ export interface PantryItem {
   unit: string
   category: string
 }
+
+export interface RecipeSuggestion {
+  name: string
+  description: string
+  usedIngredients: string[]
+  missingIngredients: string[]
+  time: string
+  difficulty: 'Fácil' | 'Médio' | 'Difícil'
+  category: string
+}

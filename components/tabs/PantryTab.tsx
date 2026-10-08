@@ -8,9 +8,10 @@ interface PantryTabProps {
   pantry: PantryItem[]
   onEditItem: (item: PantryItem) => void
   onDeleteItem: (id: string) => void
+  onSuggest?: () => void
 }
 
-export default function PantryTab({ pantry, onEditItem, onDeleteItem }: PantryTabProps) {
+export default function PantryTab({ pantry, onEditItem, onDeleteItem, onSuggest }: PantryTabProps) {
   const [collapsed, setCollapsed] = useState<Record<string, boolean>>({})
 
   // Group by category
@@ -31,6 +32,34 @@ export default function PantryTab({ pantry, onEditItem, onDeleteItem }: PantryTa
 
   return (
     <div style={{ padding: '8px 16px 16px' }}>
+      {onSuggest && (
+        <button
+          onClick={onSuggest}
+          style={{
+            width: '100%',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 8,
+            padding: '12px 16px',
+            marginBottom: 12,
+            backgroundColor: 'var(--primary)',
+            color: '#fff',
+            border: 'none',
+            borderRadius: 12,
+            fontSize: 14,
+            fontWeight: 600,
+            cursor: 'pointer',
+          }}
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M12 2a10 10 0 1 0 10 10H12V2z" />
+            <path d="M12 2a10 10 0 0 1 10 10" />
+            <path d="M12 12l4-4" />
+          </svg>
+          Sugerir receitas com a despensa
+        </button>
+      )}
       {categories.map(cat => (
         <div
           key={cat}
