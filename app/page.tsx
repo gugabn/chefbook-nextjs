@@ -19,6 +19,7 @@ import BookDetailModal from '@/components/modals/BookDetailModal'
 import AddPantryModal from '@/components/modals/AddPantryModal'
 import ShoppingListModal from '@/components/modals/ShoppingListModal'
 import SettingsModal from '@/components/modals/SettingsModal'
+import RecipeSuggestionsModal from '@/components/modals/RecipeSuggestionsModal'
 
 type Tab = 'receitas' | 'biblioteca' | 'despensa'
 
@@ -50,6 +51,7 @@ export default function Page() {
   const [shoppingOpen, setShoppingOpen] = useState(false)
 
   const [settingsOpen, setSettingsOpen] = useState(false)
+  const [suggestionsOpen, setSuggestionsOpen] = useState(false)
 
   // Toast
   const [toastMsg, setToastMsg] = useState('')
@@ -146,7 +148,6 @@ export default function Page() {
       <div
         className="app-shell"
         style={{
-          minHeight: '100dvh',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
@@ -186,7 +187,7 @@ export default function Page() {
   }
 
   return (
-    <div className="app-shell" style={{ minHeight: '100dvh', backgroundColor: 'var(--bg)' }}>
+    <div className="app-shell" style={{ backgroundColor: 'var(--bg)' }}>
       <Header
         onAdd={handleAdd}
         onSettings={() => setSettingsOpen(true)}
@@ -218,6 +219,7 @@ export default function Page() {
             pantry={pantry}
             onEditItem={handleEditPantry}
             onDeleteItem={handleDeletePantry}
+            onSuggest={() => setSuggestionsOpen(true)}
           />
         )}
       </main>
@@ -275,6 +277,13 @@ export default function Page() {
         onClose={() => setSettingsOpen(false)}
         apiKey={apiKey}
         onSave={setApiKey}
+      />
+
+      <RecipeSuggestionsModal
+        isOpen={suggestionsOpen}
+        onClose={() => setSuggestionsOpen(false)}
+        pantry={pantry}
+        apiKey={apiKey}
       />
 
       <Toast message={toastMsg} visible={toastVisible} />
